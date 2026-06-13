@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dispensador Automatizado — Prototipo Hardware Final</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { overflow: hidden; width: 100%; height: 100%; }
+    body { font-family: 'Courier New', Courier, monospace; background: #060b12; }
+
+    /* Canvas fills container absolutely */
+    #c { display: block; position: absolute; top: 0; left: 0; }
+
+    /* LED states */
+    .led-on  { background: #22d3ee; box-shadow: 0 0 6px #22d3ee, 0 0 14px #0891b266; }
+    .led-off { background: #1e2d3d; }
+
+    /* Gate card glow */
+    .gate-glow { box-shadow: 0 0 16px #0891b244, 0 0 32px #06b6d422; }
+
+    /* Wire states */
+    .wire-hot  { background-color: #22d3ee !important; }
+    .wire-cold { background-color: #1e3a52 !important; }
+
+    /* Truth table row highlights */
+    .tt-hot td  { color: #22d3ee !important; font-weight: 700; }
+    .tt-warn td { color: #fbbf24 !important; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: #070c14; }
+    ::-webkit-scrollbar-thumb { background: #1e3a52; border-radius: 2px; }
+
+    /* Button active scale */
+    .btn-ctrl:active { transform: scale(0.97); }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#060b12] text-slate-200">
+
+  <div class="flex flex-col md:flex-row w-screen h-screen">
+
+    <div id="wrap" class="relative flex-shrink-0 w-full md:w-[70%] h-[60vh] md:h-screen overflow-hidden bg-[#060b12]">
+      <canvas id="c"></canvas>
+
+      <div class="absolute top-3 left-3 flex flex-col gap-2 z-10 pointer-events-none">
+        <span class="hidden md:block text-[9px] tracking-[0.25em] text-slate-600 uppercase">
+          Sistemas UNEFA — Diseño Final de Chasis Interno
+        </span>
+        <button id="xray-btn"
+          class="btn-ctrl pointer-events-auto px-3 py-1.5 text-[10px] tracking-widest
+                 border border-slate-700 text-slate-500 bg-[#060b12cc]
+                 hover:border-cyan-700 hover:text-cyan-400 transition-colors duration-200
+                 rounded-sm cursor-pointer select-none">
+          ⬡ X-RAY : OFF (VER INTERIOR)
+        </button>
+      </div>
+
+      <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+        <span class="text-[9px] tracking-[0.2em] text-slate-700">
+          HARDWARE INTERNO v3.0 (COMPUERTA & RAMPA)
+        </span>
+        <span id="active-badge" class="text-[9px] tracking-[0.15em] text-slate-800 transition-colors duration-300">
+          SISTEMA INACTIVO
+        </span>
+      </div>
+    </div>
+
+    <div class="w-full md:w-[30%] h-[40vh] md:h-screen bg-[#070c14] border-t border-slate-800 md:border-t-0 md:border-l border-slate-800 flex flex-col overflow-hidden">
+      
+      <div class="flex-shrink-0 px-4 py-2.5 border-b border-slate-800 bg-[#060b12]">
+        <p class="text-[9px] tracking-[0.25em] text-cyan-700 uppercase">Circuito Lógico Digital</p>
+        <h1 class="text-sm font-bold text-slate-200 mt-0.5 tracking-wide">Panel de Control</h1>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-3 py-3 space-y-2.5">
+
+        <div class="bg-slate-900/50 border border-slate-800 rounded-sm p-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[9px] tracking-[0.2em] text-slate-600 uppercase">Input A</span>
+            <div id="led-a" class="w-2.5 h-2.5 rounded-full led-off transition-all duration-300 flex-shrink-0"></div>
+          </div>
+          <p class="text-[9px] text-slate-500 mb-2.5 tracking-wider">Sensor de Presencia (HC-SR04)</p>
+          <button id="btn-a"
+            class="btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-700 text-slate-500 bg-slate-950 hover:border-slate-600 transition-colors duration-200"
+            onclick="window.__ctrl('A')">
+            A = 0 &nbsp;|&nbsp; INACTIVO
+          </button>
+        </div>
+
+        <div class="bg-slate-900/50 border border-slate-800 rounded-sm p-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[9px] tracking-[0.2em] text-slate-600 uppercase">Input B</span>
+            <div id="led-b" class="w-2.5 h-2.5 rounded-full led-off transition-all duration-300 flex-shrink-0"></div>
+          </div>
+          <p class="text-[9px] text-slate-500 mb-2.5 tracking-wider">Temporizador / Horario Activo</p>
+          <button id="btn-b"
+            class="btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-700 text-slate-500 bg-slate-950 hover:border-slate-600 transition-colors duration-200"
+            onclick="window.__ctrl('B')">
+            B = 0 &nbsp;|&nbsp; INACTIVO
+          </button>
+        </div>
+
+        <div id="gate-card" class="bg-[#060b12] border border-slate-800 rounded-sm p-3 transition-all duration-500">
+          <p class="text-[9px] tracking-[0.2em] text-slate-600 uppercase mb-3">Compuerta Lógica Integrada</p>
+          <div class="flex items-center justify-center">
+            <div class="flex flex-col gap-3 mr-1.5">
+              <div class="flex items-center gap-1">
+                <span class="text-[9px] text-slate-600 w-3">A</span>
+                <div id="wire-a" class="h-px w-8 wire-cold transition-colors duration-300"></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="text-[9px] text-slate-600 w-3">B</span>
+                <div id="wire-b" class="h-px w-8 wire-cold transition-colors duration-300"></div>
+              </div>
+            </div>
+
+            <svg width="58" height="44" viewBox="0 0 58 44" class="flex-shrink-0">
+              <path id="gp" d="M4,3 L27,3 Q54,3 54,22 Q54,41 27,41 L4,41 Z" fill="#080f18" stroke="#334155" stroke-width="1.5" stroke-linejoin="round"/>
+              <line id="gl-a" x1="0" y1="13" x2="4" y2="13" stroke="#334155" stroke-width="1.5"/>
+              <line id="gl-b" x1="0" y1="31" x2="4" y2="31" stroke="#334155" stroke-width="1.5"/>
+              <line id="gl-o" x1="54" y1="22" x2="58" y2="22" stroke="#334155" stroke-width="1.5"/>
+              <text id="gt" x="16" y="26" font-family="monospace" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">AND</text>
+            </svg>
+
+            <div class="flex items-center gap-1.5 ml-1.5">
+              <div id="wire-o" class="h-px w-6 wire-cold transition-colors duration-300"></div>
+              <div id="led-o" class="w-4 h-4 rounded-full led-off border border-slate-800 transition-all duration-300 flex-shrink-0"></div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-2.5 border-t border-slate-900 flex justify-between items-center">
+            <span class="text-[9px] text-slate-600 tracking-wider">SALIDA DIGITAL (Q) :</span>
+            <span id="out-val" class="text-[10px] font-bold text-slate-600">A · B = 0 (SALIDA BAJA)</span>
+          </div>
+        </div>
+
+        <div class="bg-[#060b12] border border-slate-800 rounded-sm p-3">
+          <p class="text-[9px] tracking-[0.2em] text-slate-600 uppercase mb-2">Tabla de Verdad Estática</p>
+          <table class="w-full text-[10px] border-collapse">
+            <thead>
+              <tr class="text-slate-700 border-b border-slate-800">
+                <th class="pb-1.5 text-left font-medium tracking-wider">Input A</th>
+                <th class="pb-1.5 text-left font-medium tracking-wider">Input B</th>
+                <th class="pb-1.5 text-left font-medium tracking-wider">Salida Q</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="r00" class="border-b border-slate-900/40"><td class="py-1 text-slate-700">0</td><td class="py-1 text-slate-700">0</td><td class="py-1 text-slate-700">0</td></tr>
+              <tr id="r01" class="border-b border-slate-900/40"><td class="py-1 text-slate-700">0</td><td class="py-1 text-slate-700">1</td><td class="py-1 text-slate-700">0</td></tr>
+              <tr id="r10" class="border-b border-slate-900/40"><td class="py-1 text-slate-700">1</td><td class="py-1 text-slate-700">0</td><td class="py-1 text-slate-700">0</td></tr>
+              <tr id="r11"><td class="py-1 text-slate-700">1</td><td class="py-1 text-slate-700">1</td><td class="py-1 text-slate-700">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="bg-[#060b12] border border-slate-800 rounded-sm p-3">
+          <p class="text-[9px] tracking-[0.2em] text-slate-600 uppercase mb-2">Diagnóstico de Hardware</p>
+          <div class="space-y-1.5 text-[10px]">
+            <div class="flex justify-between"><span class="text-slate-600">Ubicación Arduino:</span><span class="text-cyan-600 font-bold">INTERNO (CAJA) [OK]</span></div>
+            <div class="flex justify-between"><span class="text-slate-600">LCD Display :</span><span id="st-lcd" class="text-slate-500">MODO ESPERA</span></div>
+            <div class="flex justify-between"><span class="text-slate-600">Motor NEMA 17 :</span><span id="st-m" class="text-slate-500">REPOSO LOCK</span></div>
+            <div class="flex justify-between"><span class="text-slate-600">Lámina Codo PVC :</span><span id="st-d" class="text-slate-500">COMPUERTA CERRADA</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ESTADOS DE CONTROL
+    let inA = false, inB = false, xray = false, active = false, flapAngle = 0;
+
+    // CONFIGURACIÓN DEL RENDERER
+    const wrap   = document.getElementById('wrap');
+    const canvas = document.getElementById('c');
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas, antialias: false, powerPreference: 'low-power', alpha: false
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.2));
+
+    // ESCENA Y NIEBLA
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x060b12);
+    scene.fog = new THREE.FogExp2(0x060b12, 0.05);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 80);
+    camera.position.set(3.8, 2.5, 4.0);
+
+    function resize() {
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // ILUMINACIÓN INDUSTRIAL FIJA
+    scene.add(new THREE.AmbientLight(0x1a334d, 1.3));
+    const light1 = new THREE.DirectionalLight(0x7fb3d5, 1.7);
+    light1.position.set(6, 12, 6);
+    scene.add(light1);
+
+    const light2 = new THREE.DirectionalLight(0x0f2537, 1.0);
+    light2.position.set(-6, 3, -6);
+    scene.add(light2);
+
+    // CONTROLES ORBITALES TÁCTILES Y RATÓN
+    const oc = new OrbitControls(camera, renderer.domElement);
+    oc.enableDamping  = true;
+    oc.dampingFactor  = 0.08;
+    oc.minDistance    = 1.8;
+    oc.maxDistance    = 9.0;
+    oc.target.set(0, -0.1, 0);
+
+    const grid = new THREE.GridHelper(16, 32, 0x0e243d, 0x081626);
+    grid.position.y = -1.2;
+    scene.add(grid);
+
+    // PALETA DE MATERIALES
+    const ph = (color, opts = {}) => new THREE.MeshPhongMaterial({
+      color, flatShading: true, ...opts
+    });
+
+    const M = {
+      casing    : ph(0x28384d),
+      casingXR  : ph(0x384e6b, { transparent: true, opacity: 0.15, depthWrite: false }),
+      hopper    : ph(0x3e4e5e),
+      base      : ph(0x223040),
+      bowlOff   : ph(0x162938),
+      bowlOn    : ph(0x0891b2, { emissive: 0x04627a, emissiveIntensity: 0.5 }),
+      accent    : ph(0x0d5c73),
+      face      : ph(0x090d12), // Fondo ultra oscuro para el orificio
+      food      : ph(0xd97706),
+      pcbGreen  : ph(0x145a32),
+      pcbBlue   : ph(0x1f618d),
+      silver    : ph(0xb2babb, { shininess: 40 }),
+      pins      : ph(0x1c2833),
+      lcdOff    : ph(0x196f3d),
+      lcdOn     : ph(0x22d3ee, { emissive: 0x0891b2, emissiveIntensity: 0.8 }),
+      nemaBody  : ph(0x2c3e50),
+      nemaOn    : ph(0x117a65, { emissive: 0x114e41, emissiveIntensity: 0.4 })
+    };
+
+    function mk(geo, mat) {
+      return new THREE.Mesh(geo, mat);
+    }
+
+    // CONSTRUCCIÓN DEL MODELO ACTUALIZADO
+    const root = new THREE.Group();
+    scene.add(root);
+
+    // Base inferior del prototipo
+    const plate = mk(new THREE.BoxGeometry(2.3, 0.12, 2.3), M.base);
+    plate.position.y = -1.14;
+    root.add(plate);
+
+    // CAJA PRINCIPAL DEL DISPENSADOR (CHASIS AUTOMOCIONADO)
+    const casing = mk(new THREE.BoxGeometry(1.4, 1.8, 1.4), M.casing);
+    casing.position.set(0, 0.2, -0.2);
+    root.add(casing);
+
+    // CAMBIO 1: ELIMINACIÓN DEL CONO, SE CORONA CON EL ORIFICIO DEL CILINDRO
+    const topHole = mk(new THREE.CylinderGeometry(0.48, 0.48, 0.02, 16), M.face);
+    topHole.position.set(0, 1.101, -0.2); // Justo en la tapa superior plana de la caja
+    root.add(topHole);
+
+    // CAMBIO 2: RAMPA INTERNA DE CAÍDA DIRECTA (REPLICA LA FOTO DE CONSTRUCCIÓN)
+    const rampa = mk(new THREE.BoxGeometry(0.85, 0.04, 1.1), M.hopper);
+    rampa.position.set(-0.15, 0.0, -0.2);
+    rampa.rotation.z = -Math.PI / 5.5; // Inclinada con pendiente hacia la derecha (hacia el codo)
+    root.add(rampa);
+
+    // Codo de salida de PVC exterior
+    const nozzle = mk(new THREE.CylinderGeometry(0.12, 0.14, 0.45, 8), M.accent);
+    nozzle.rotation.z = Math.PI / 2.6;
+    nozzle.position.set(0.55, -0.6, -0.2);
+    root.add(nozzle);
+
+    // CAMBIO 3: LÁMINA INTERNA DEL CODO (ABRE/CIERRA MEDIANTE SERVOMOTOR)
+    const flapPivot = new THREE.Group();
+    flapPivot.position.set(0.48, -0.5, -0.2); // Ubicada en la entrada interna del codo
+    flapPivot.rotation.z = Math.PI / 2.6; // Sincronizada con el ángulo del codo
+    root.add(flapPivot);
+
+    const laminaInterna = mk(new THREE.BoxGeometry(0.02, 0.22, 0.22), M.silver);
+    laminaInterna.position.y = -0.11; // Desfase para que rote desde la parte superior (bisagra)
+    flapPivot.add(laminaInterna);
+
+    // Plato receptor de comida
+    const bowl = mk(new THREE.CylinderGeometry(0.56, 0.46, 0.12, 10), M.bowlOff);
+    bowl.position.set(1.0, -0.98, -0.2);
+    root.add(bowl);
+
+    // CAMBIO 4: ARDUINO UNO MIGRADO AL INTERIOR DE LA CAJA (VER CON X-RAY)
+    const arduino = new THREE.Group();
+    arduino.position.set(-0.2, -0.5, -0.2); // Aloja perfectamente abajo de la rampa
+    arduino.rotation.y = Math.PI / 2;       // Orientado de forma técnica en el fondo
+
+    const pcb = mk(new THREE.BoxGeometry(0.48, 0.02, 0.65), M.pcbGreen);
+    const usb = mk(new THREE.BoxGeometry(0.12, 0.09, 0.18), M.silver);
+    usb.position.set(-0.15, 0.05, -0.25);
+    const powerJack = mk(new THREE.BoxGeometry(0.13, 0.11, 0.16), M.face);
+    powerJack.position.set(0.14, 0.06, -0.25);
+    const pinsL = mk(new THREE.BoxGeometry(0.03, 0.04, 0.42), M.pins);
+    pinsL.position.set(-0.2, 0.03, 0.05);
+    const pinsR = mk(new THREE.BoxGeometry(0.03, 0.04, 0.35), M.pins);
+    pinsR.position.set(0.2, 0.03, 0.08);
+
+    arduino.add(pcb, usb, powerJack, pinsL, pinsR);
+    root.add(arduino);
+
+    // Motor de arrastre NEMA 17 acoplado mecánicamente al interior
+    const nema17 = mk(new THREE.BoxGeometry(0.48, 0.48, 0.48), M.nemaBody);
+    nema17.position.set(0.2, -0.5, -0.2);
+    root.add(nema17);
+
+    // PANTALLA LCD 16X2 EN PANEL EXTERIOR FRONTAL
+    const lcdModule = new THREE.Group();
+    lcdModule.position.set(0, 0.5, 0.52);
+    const lcdPCB = mk(new THREE.BoxGeometry(0.72, 0.32, 0.02), M.pcbGreen);
+    const lcdFrame = mk(new THREE.BoxGeometry(0.58, 0.24, 0.025), M.face);
+    lcdFrame.position.z = 0.01;
+    const lcdDisplay = mk(new THREE.BoxGeometry(0.5, 0.16, 0.02), M.lcdOff);
+    lcdDisplay.position.z = 0.02;
+    lcdModule.add(lcdPCB, lcdFrame, lcdDisplay);
+    root.add(lcdModule);
+
+    // SENSOR ULTRASÓNICO HC-SR04 FRONTAL
+    const sonar = new THREE.Group();
+    sonar.position.set(0, -0.1, 0.52);
+    const sonarPCB = mk(new THREE.BoxGeometry(0.34, 0.15, 0.02), M.pcbBlue);
+    const txEye = mk(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 8), M.silver);
+    txEye.rotation.x = Math.PI / 2;
+    txEye.position.set(-0.09, 0, 0.04);
+    const rxEye = txEye.clone();
+    rxEye.position.x = 0.09;
+    sonar.add(sonarPCB, txEye, rxEye);
+    root.add(sonar);
+
+    const casingParts = [casing];
+
+    // POOL ESTÁTICO DE PARTÍCULAS DE ALIMENTO (MAX 15 PARA VELOCIDAD EXTREMA)
+    const POOL = 15;
+    const DROP_Y = -0.52, BASE_Y = -0.94, SPREAD = 0.1;
+    const foodGeo = new THREE.SphereGeometry(0.045, 5, 4);
+    const particles = [];
+
+    for (let i = 0; i < POOL; i++) {
+      const p = mk(foodGeo, M.food);
+      p.visible = false;
+      p.userData = { active: false, vY: 0, delay: i * 4 };
+      root.add(p);
+      particles.push(p);
+    }
+
+    // BUCLE DE RENDERIZADO Y ANIMACIÓN
+    const clock = new THREE.Clock();
+    let frames = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      frames++;
+
+      // Mecánica de apertura suave de la compuerta interna (Lámina)
+      // Si está activo rota a -65 grados abriendo el conducto, si no, vuelve a cero (Cerrado)
+      const targetAngle = active ? -Math.PI / 2.8 : 0;
+      flapAngle += (targetAngle - flapAngle) * 9.0 * dt;
+      laminaInterna.rotation.z = flapAngle;
+
+      // Caída física simulada por rampa
+      for (let i = 0; i < POOL; i++) {
+        const p = particles[i];
+        if (active) {
+          if (!p.userData.active) {
+            if (--p.userData.delay <= 0) {
+              p.userData.active = true;
+              p.userData.vY = -(0.01 + Math.random() * 0.01);
+              p.position.set(0.5 + (Math.random() - 0.5) * SPREAD, DROP_Y, -0.2 + (Math.random() - 0.5) * SPREAD);
+              p.visible = true;
+            }
+          } else {
+            p.userData.vY -= 0.002; // Gravedad constante
+            p.position.y += p.userData.vY;
+            p.position.x += 0.011; // Impulso por inclinación de rampa
+            if (p.position.y <= BASE_Y) {
+              p.userData.active = false;
+              p.visible = false;
+              p.userData.delay = 4 + Math.floor(Math.random() * 8);
+            }
+          }
+        } else if (p.visible) {
+          p.visible = false;
+          p.userData.active = false;
+          p.userData.delay = i * 4;
+        }
+      }
+
+      // Estabilización inercial de cámara
+      root.position.y = Math.sin(frames * 0.015) * 0.012;
+
+      oc.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // INTERFAZ DE USUARIO Y CONTROL DE LOGICA DIGITAL
+    function ui() {
+      active = inA && inB;
+
+      const inputs = [['A', inA, 'btn-a', 'led-a'], ['B', inB, 'btn-b', 'led-b']];
+      inputs.forEach(([label, state, btnId, ledId]) => {
+        const btn = document.getElementById(btnId);
+        const led = document.getElementById(ledId);
+        if (state) {
+          btn.textContent = `${label} = 1 | ACTIVO`;
+          btn.className = 'btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-cyan-700 text-cyan-300 bg-cyan-950/60 transition-colors duration-200';
+          led.className = 'w-2.5 h-2.5 rounded-full led-on transition-all duration-300 flex-shrink-0';
+        } else {
+          btn.textContent = `${label} = 0 | INACTIVO`;
+          btn.className = 'btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-700 text-slate-500 bg-slate-950 hover:border-slate-600 transition-colors duration-200';
+          led.className = 'w-2.5 h-2.5 rounded-full led-off transition-all duration-300 flex-shrink-0';
+        }
+      });
+
+      const gp  = document.getElementById('gp');
+      const gt  = document.getElementById('gt');
+      const gla = document.getElementById('gl-a');
+      const glb = document.getElementById('gl-b');
+      const glo = document.getElementById('gl-o');
+
+      if (active) {
+        gp.setAttribute('fill', '#071824'); gp.setAttribute('stroke', '#22d3ee');
+        gt.setAttribute('fill', '#22d3ee');
+        [gla, glb, glo].forEach(line => line.setAttribute('stroke', '#22d3ee'));
+      } else {
+        gp.setAttribute('fill', '#080f18'); gp.setAttribute('stroke', '#334155');
+        gt.setAttribute('fill', '#475569');
+        gla.setAttribute('stroke', inA ? '#0e7490' : '#334155');
+        glb.setAttribute('stroke', inB ? '#0e7490' : '#334155');
+        glo.setAttribute('stroke', '#334155');
+      }
+
+      document.getElementById('wire-a').className = `h-px w-8 transition-colors duration-300 ${inA ? 'wire-hot' : 'wire-cold'}`;
+      document.getElementById('wire-b').className = `h-px w-8 transition-colors duration-300 ${inB ? 'wire-hot' : 'wire-cold'}`;
+      document.getElementById('wire-o').className = `h-px w-6 transition-colors duration-300 ${active ? 'wire-hot' : 'wire-cold'}`;
+
+      const ledO = document.getElementById('led-o');
+      ledO.className = active
+        ? 'w-4 h-4 rounded-full led-on border border-cyan-700 transition-all duration-300 flex-shrink-0'
+        : 'w-4 h-4 rounded-full led-off border border-slate-800 transition-all duration-300 flex-shrink-0';
+
+      const gc = document.getElementById('gate-card');
+      gc.className = active ? 'bg-[#060b12] border border-cyan-900 rounded-sm p-3 transition-all duration-500 gate-glow' : 'bg-[#060b12] border border-slate-800 rounded-sm p-3 transition-all duration-500';
+
+      const ov = document.getElementById('out-val');
+      ov.textContent = active ? 'A · B = 1  (SALIDA ALTA)' : 'A · B = 0  (SALIDA BAJA)';
+      ov.className = `text-[10px] font-bold transition-colors duration-300 ${active ? 'text-cyan-300' : 'text-slate-600'}`;
+
+      ['r00','r01','r10','r11'].forEach(id => {
+        const r = document.getElementById(id);
+        r.querySelectorAll('td').forEach(td => { td.className = 'py-1 text-slate-700'; });
+      });
+      const targetRow = document.getElementById(`r${inA?1:0}${inB?1:0}`);
+      targetRow.className = active ? 'border-b border-cyan-900/50 bg-cyan-950/25 tt-hot' : 'border-b border-slate-700/30 bg-slate-900/30 tt-warn';
+
+      const stLcd = document.getElementById('st-lcd');
+      const stM = document.getElementById('st-m');
+      const stD = document.getElementById('st-d');
+      const badge = document.getElementById('active-badge');
+
+      if (active) {
+        stLcd.textContent = 'ABRIENDO COMPUERTA'; stLcd.className = 'text-cyan-400 font-bold';
+        stM.textContent = 'PULSO DE APERTURA';  stM.className = 'text-cyan-400 font-bold';
+        stD.textContent = 'LAMINA: ABIERTA';    stD.className = 'text-cyan-400 font-bold';
+        badge.textContent = '● DISPENSANDO ALIMENTO';
+        badge.className = 'text-[9px] tracking-[0.15em] text-cyan-500 transition-colors duration-300';
+        
+        lcdDisplay.material = M.lcdOn;
+        nema17.material = M.nemaOn;
+        bowl.material = M.bowlOn;
+      } else {
+        stLcd.textContent = inB ? 'ESPERANDO PRESENCIA' : 'MODO ESPERA'; stLcd.className = 'text-slate-500';
+        stM.textContent = 'REPOSO LOCK';        stM.className = 'text-slate-500';
+        stD.textContent = 'COMPUERTA CERRADA';   stD.className = 'text-slate-500';
+        badge.textContent = 'SISTEMA INACTIVO';
+        badge.className = 'text-[9px] tracking-[0.15em] text-slate-700 transition-colors duration-300';
+        
+        lcdDisplay.material = inB ? M.lcdOn : M.lcdOff;
+        nema17.material = M.nemaBody;
+        bowl.material = M.bowlOff;
+      }
+    }
+
+    window.__ctrl = function(channel) {
+      if (channel === 'A') inA = !inA;
+      else                 inB = !inB;
+      ui();
+    };
+
+    // INTERRUPTOR MODO RADIOGRAFÍA (X-RAY)
+    document.getElementById('xray-btn').addEventListener('click', () => {
+      xray = !xray;
+      casingParts.forEach(part => { part.material = xray ? M.casingXR : M.casing; });
+      const btn = document.getElementById('xray-btn');
+      if (xray) {
+        btn.textContent = '⬡ X-RAY : ON (OCULTAR INTERIOR)';
+        btn.className = 'btn-ctrl pointer-events-auto px-3 py-1.5 text-[10px] tracking-widest border border-cyan-500 text-cyan-300 bg-cyan-950/80 transition-colors duration-200 rounded-sm cursor-pointer select-none';
+      } else {
+        btn.textContent = '⬡ X-RAY : OFF (VER INTERIOR)';
+        btn.className = 'btn-ctrl pointer-events-auto px-3 py-1.5 text-[10px] tracking-widest border border-slate-700 text-slate-500 bg-[#060b12cc] hover:border-cyan-700 hover:text-cyan-400 transition-colors duration-200 rounded-sm cursor-pointer select-none';
+      }
+    });
+
+    ui();
+  </script>
+</body>
+</html>
