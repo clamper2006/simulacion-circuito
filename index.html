@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dispensador Automatizado — Entorno Smart Final</title>
+  <title>Dispensador Automatizado — Gemelo Digital Corregido</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { overflow: hidden; width: 100%; height: 100%; }
     
-    /* Variables de Tema Dinámicas para Alta Visibilidad */
+    /* Variables de Tema Dinámicas */
     :root {
       --bg-main: #060b12;
       --bg-panel: #070c14;
@@ -31,9 +31,9 @@
     }
 
     body { font-family: 'Courier New', Courier, monospace; background: var(--bg-main); color: var(--text); }
-    #c { display: block; position: absolute; top: 0; left: 0; }
+    #c { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-    /* Estados Lógicos Dinámicos */
+    /* Estados Lógicos */
     .led-on  { background: #22d3ee; box-shadow: 0 0 8px #22d3ee, 0 0 16px #0891b266; }
     .led-off { background: #334155; }
     .gate-glow { box-shadow: 0 0 16px #0891b244, 0 0 32px #06b6d422; }
@@ -50,14 +50,8 @@
     .btn-ctrl:active { transform: scale(0.97); }
   </style>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body class="transition-colors duration-300">
 
@@ -66,7 +60,7 @@
     <div id="wrap" class="relative flex-shrink-0 w-full md:w-[70%] h-[58vh] md:h-screen overflow-hidden">
       <canvas id="c"></canvas>
 
-      <div class="absolute top-3 left-3 flex flex-wrap gap-2 z-10 pointer-events-none">
+      <div class="absolute top-3 left-3 flex flex-wrap gap-2 z-10">
         <button id="theme-btn"
           class="btn-ctrl pointer-events-auto px-3 py-1.5 text-[10px] tracking-widest font-bold
                  border border-amber-600 text-amber-600 bg-amber-500/10 hover:bg-amber-500/20
@@ -83,7 +77,7 @@
 
       <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
         <span class="text-[9px] tracking-[0.2em] opacity-60 font-bold text-cyan-600">
-          PROTOTIPO v4.0 — ENTORNO SMART CON MASCOTA
+          DISEÑO CIRCUITAL FILTRADO — MAQUETA CILINDRO & RAMPA
         </span>
         <span id="active-badge" class="text-[9px] tracking-[0.15em] font-bold opacity-40">
           SISTEMA EN REPOSO
@@ -91,8 +85,7 @@
       </div>
     </div>
 
-    <div class="w-full md:w-[30%] h-[42vh] md:h-screen border-t md:border-t-0 md:border-l flex flex-col overflow-hidden transition-colors duration-300" 
-         style="background-color: var(--bg-panel); border-color: var(--border);">
+    <div class="w-full md:w-[30%] h-[42vh] md:h-screen border-t md:border-t-0 md:border-l flex flex-col overflow-hidden transition-colors duration-300" style="background-color: var(--bg-panel); border-color: var(--border);">
       
       <div class="flex-shrink-0 px-4 py-3 border-b transition-colors duration-300" style="background-color: var(--bg-main); border-color: var(--border);">
         <p class="text-[9px] tracking-[0.25em] text-cyan-600 uppercase font-bold">Circuito Lógico Integrado</p>
@@ -100,18 +93,13 @@
       </div>
 
       <div class="flex-1 overflow-y-auto px-3 py-3 space-y-3">
-
         <div class="border rounded-sm p-3 transition-colors duration-300" style="background-color: var(--card); border-color: var(--border);">
           <div class="flex items-center justify-between mb-1">
             <span class="text-[9px] tracking-[0.2em] uppercase font-bold" style="color: var(--text-muted)">Input A</span>
             <div id="led-a" class="w-2.5 h-2.5 rounded-full led-off transition-all duration-300"></div>
           </div>
           <p class="text-[9px] mb-2.5 tracking-wider" style="color: var(--text-muted)">Sensor de Presencia (HC-SR04)</p>
-          <button id="btn-a"
-            class="btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-500 bg-black/10 transition-colors duration-200"
-            onclick="window.__ctrl('A')">
-            A = 0 &nbsp;|&nbsp; INACTIVO
-          </button>
+          <button id="btn-a" class="btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-500 bg-black/10 transition-colors duration-200" onclick="window.__ctrl('A')">A = 0 &nbsp;|&nbsp; INACTIVO</button>
         </div>
 
         <div class="border rounded-sm p-3 transition-colors duration-300" style="background-color: var(--card); border-color: var(--border);">
@@ -120,27 +108,16 @@
             <div id="led-b" class="w-2.5 h-2.5 rounded-full led-off transition-all duration-300"></div>
           </div>
           <p class="text-[9px] mb-2.5 tracking-wider" style="color: var(--text-muted)">Temporizador / Horario Activo</p>
-          <button id="btn-b"
-            class="btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-500 bg-black/10 transition-colors duration-200"
-            onclick="window.__ctrl('B')">
-            B = 0 &nbsp;|&nbsp; INACTIVO
-          </button>
+          <button id="btn-b" class="btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-500 bg-black/10 transition-colors duration-200" onclick="window.__ctrl('B')">B = 0 &nbsp;|&nbsp; INACTIVO</button>
         </div>
 
         <div id="gate-card" class="border rounded-sm p-3 transition-all duration-300" style="background-color: var(--card); border-color: var(--border);">
           <p class="text-[9px] tracking-[0.2em] uppercase font-bold mb-3" style="color: var(--text-muted)">Esquema Eléctrico AND</p>
           <div class="flex items-center justify-center">
             <div class="flex flex-col gap-3 mr-2">
-              <div class="flex items-center gap-1">
-                <span class="text-[9px] font-bold w-3">A</span>
-                <div id="wire-a" class="h-px w-8 wire-cold transition-colors duration-300"></div>
-              </div>
-              <div class="flex items-center gap-1">
-                <span class="text-[9px] font-bold w-3">B</span>
-                <div id="wire-b" class="h-px w-8 wire-cold transition-colors duration-300"></div>
-              </div>
+              <div class="flex items-center gap-1"><span class="text-[9px] font-bold w-3">A</span><div id="wire-a" class="h-px w-8 wire-cold transition-colors duration-300"></div></div>
+              <div class="flex items-center gap-1"><span class="text-[9px] font-bold w-3">B</span><div id="wire-b" class="h-px w-8 wire-cold transition-colors duration-300"></div></div>
             </div>
-
             <svg width="58" height="44" viewBox="0 0 58 44" class="flex-shrink-0">
               <path id="gp" d="M4,3 L27,3 Q54,3 54,22 Q54,41 27,41 L4,41 Z" fill="transparent" stroke="#475569" stroke-width="1.5"/>
               <line id="gl-a" x1="0" y1="13" x2="4" y2="13" stroke="#475569" stroke-width="1.5"/>
@@ -148,13 +125,11 @@
               <line id="gl-o" x1="54" y1="22" x2="58" y2="22" stroke="#475569" stroke-width="1.5"/>
               <text id="gt" x="16" y="26" font-family="monospace" font-size="9" font-weight="700" fill="#475569">AND</text>
             </svg>
-
             <div class="flex items-center gap-1.5 ml-2">
               <div id="wire-o" class="h-px w-6 wire-cold transition-colors duration-300"></div>
               <div id="led-o" class="w-4 h-4 rounded-full led-off border border-slate-700 transition-all duration-300"></div>
             </div>
           </div>
-
           <div class="mt-3 pt-2 border-t flex justify-between items-center transition-colors duration-300" style="border-color: var(--border);">
             <span class="text-[9px] tracking-wider" style="color: var(--text-muted)">SALIDA DIGITAL (Q) :</span>
             <span id="out-val" class="text-[10px] font-bold opacity-60">A · B = 0</span>
@@ -181,8 +156,9 @@
 
         <div class="border rounded-sm p-3 transition-colors duration-300" style="background-color: var(--card); border-color: var(--border);">
           <div class="space-y-1.5 text-[10px]">
+            <div class="flex justify-between"><span style="color: var(--text-muted)">Pantalla LCD:</span><span id="st-lcd" class="font-bold opacity-60">MODO ESPERA</span></div>
             <div class="flex justify-between"><span style="color: var(--text-muted)">Estado Mascota:</span><span id="st-cat" class="font-bold text-amber-600">ESPERANDO JUNTO AL PLATO</span></div>
-            <div class="flex justify-between"><span style="color: var(--text-muted)">LCD Pantalla   :</span><span id="st-lcd" class="font-bold opacity-60">MODO ESPERA</span></div>
+            <div class="flex justify-between"><span style="color: var(--text-muted)">Flujo de Alimento:</span><span id="st-m" class="font-bold opacity-60">RETENIDO EN CILINDRO</span></div>
             <div class="flex justify-between"><span style="color: var(--text-muted)">Servocompuerta :</span><span id="st-d" class="font-bold opacity-60">CERRADA</span></div>
           </div>
         </div>
@@ -191,29 +167,30 @@
     </div>
   </div>
 
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-    // ESTADOS LOGICOS Y CONFIGURACIÓN
+  <script>
+    // Variables de Control Lógico Globales
     let inA = false, inB = false, xray = false, active = false, isLight = false;
     let flapAngle = 0, tailTimer = 0;
+    let initialResizeTicks = 10; // Fuerza recalibraciones de tamaño inicial para evitar pantallas colapsadas
 
     const wrap = document.getElementById('wrap');
     const canvas = document.getElementById('c');
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'low-power' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.2));
+    // Inicialización del Motor Gráfico WebGL
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x060b12);
-    scene.fog = new THREE.FogExp2(0x060b12, 0.05);
+    scene.fog = new THREE.FogExp2(0x060b12, 0.04);
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 80);
     camera.position.set(4.0, 2.2, 3.8);
 
+    // Sistema Dinámico de Dimensionamiento Contra Bloqueos Gráficos
     function resize() {
-      const w = wrap.clientWidth, h = wrap.clientHeight;
+      const w = wrap.clientWidth || window.innerWidth * 0.7;
+      const h = wrap.clientHeight || window.innerHeight;
       renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -221,234 +198,243 @@
     resize();
     window.addEventListener('resize', resize);
 
-    // ILUMINACIÓN GLOBAL EQUILIBRADA
-    const ambientLight = new THREE.AmbientLight(0x1a334d, 1.4);
+    // ARREGLO DE ILUMINACIÓN INDUSTRIAL COMPLETA
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
     scene.add(ambientLight);
-
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.6);
+    
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.8);
     dirLight1.position.set(5, 12, 6);
     scene.add(dirLight1);
-
-    const dirLight2 = new THREE.DirectionalLight(0x7fb3d5, 0.8);
+    
+    const dirLight2 = new THREE.DirectionalLight(0x7fb3d5, 1.0);
     dirLight2.position.set(-5, 4, -5);
     scene.add(dirLight2);
 
-    const oc = new OrbitControls(camera, renderer.domElement);
-    oc.enableDamping = true;
+    // Controles de Órbita Táctiles y de Ratón
+    const oc = new THREE.OrbitControls(camera, renderer.domElement);
+    oc.enableDamping = true; 
     oc.dampingFactor = 0.08;
-    oc.minDistance = 1.8;
-    oc.maxDistance = 10.0;
+    oc.minDistance = 1.8; 
+    oc.maxDistance = 10.0; 
     oc.target.set(0.2, -0.2, 0);
 
-    // Rejilla Dinámica
     let grid = new THREE.GridHelper(16, 32, 0x0e243d, 0x081626);
     grid.position.y = -1.2;
     scene.add(grid);
 
-    // PALETA DE MATERIALES
+    // Paleta de Materiales Shading Phong Estables
     const ph = (color, opts = {}) => new THREE.MeshPhongMaterial({ color, flatShading: true, ...opts });
 
     const M = {
       casing:     ph(0x2c3e50),
-      casingXR:   ph(0x34495e, { transparent: true, opacity: 0.12, depthWrite: false }),
-      hopper:     ph(0x7f8c8d),
+      casingXR:   ph(0x34495e, { transparent: true, opacity: 0.15, depthWrite: false }),
       base:       ph(0x1a252f),
-      bowlOff:    ph(0xe056fd), // Tazón rosado/magenta llamativo como el de la imagen
+      bowlOff:    ph(0xe056fd),
       bowlOn:     ph(0xff79da, { emissive: 0x6d214f, emissiveIntensity: 0.6 }),
-      accent:     ph(0xbdc3c7), // Codo de PVC Gris Claro/Blanco
+      accent:     ph(0xbdc3c7),
       hole:       ph(0x0b0f19),
       food:       ph(0xd35400),
-      pcbGreen:   ph(0x27ae60),
-      pcbBlue:    ph(0x2980b9),
+      internal:   ph(0x16a085), 
+      pcbGreen:   ph(0x27ae60), 
+      pcbBlue:    ph(0x2980b9), 
       silver:     ph(0xdfe6e9, { shininess: 60 }),
-      pins:       ph(0x2c3e50),
-      lcdOff:     ph(0x1e824c),
+      pins:       ph(0x2c3e50), 
+      lcdOff:     ph(0x1e824c), 
       lcdOn:      ph(0x00ffff, { emissive: 0x00a8ff, emissiveIntensity: 0.8 }),
-      catFur:     ph(0xf39c12), // Gatito Naranja de la suerte
-      catWhite:   ph(0xf5f6fa),
+      catFur:     ph(0xf39c12), 
+      catWhite:   ph(0xf5f6fa), 
       catEyes:    ph(0x2ecc71)
     };
 
     function mk(geo, mat) { return new THREE.Mesh(geo, mat); }
 
-    // CONSTRUCCIÓN DEL MODELO ENTORNO SMART
     const modelGroup = new THREE.Group();
     scene.add(modelGroup);
 
-    // Banco de pruebas base
+    // PLATO BASE DE SOPORTE
     const plate = mk(new THREE.BoxGeometry(2.6, 0.1, 2.6), M.base);
     plate.position.y = -1.14;
     modelGroup.add(plate);
 
-    // Carcasa principal cilíndrica/caja limpia con orificio superior
+    // ESTRUCTURA EXTERIOR DE LA CARCASA
     const casing = mk(new THREE.BoxGeometry(1.3, 1.8, 1.3), M.casing);
     casing.position.set(0, -0.2, -0.2);
     modelGroup.add(casing);
 
-    // Orificio superior limpio (Sin cono externo)
-    const topHole = mk(new THREE.CylinderGeometry(0.46, 0.46, 0.02, 16), M.hole);
-    topHole.position.set(0, 0.702, -0.2);
+    // ORIFICIO ALIMENTADOR SUPERIOR
+    const topHole = mk(new THREE.CylinderGeometry(0.24, 0.24, 0.02, 16), M.hole);
+    topHole.position.set(-0.25, 0.702, -0.2);
     modelGroup.add(topHole);
 
-    // Rampa interna inclinada hacia la derecha
-    const rampa = mk(new THREE.BoxGeometry(0.8, 0.04, 1.0), M.hopper);
-    rampa.position.set(-0.15, -0.3, -0.2);
-    rampa.rotation.z = -Math.PI / 6;
-    modelGroup.add(rampa);
+    // GRUPO DE HARDWARE INTERNO FILTRADO (Se revela con el Modo X-Ray)
+    const hardwareGroup = new THREE.Group();
+    modelGroup.add(hardwareGroup);
 
-    // Codo exterior de PVC
+    // CILINDRO INTERNO DE DEPOSITOS
+    const storageTube = mk(new THREE.CylinderGeometry(0.24, 0.24, 1.0, 12), M.internal);
+    storageTube.position.set(-0.25, 0.2, -0.2);
+    hardwareGroup.add(storageTube);
+
+    // RAMPA METÁLICA DE CAÍDA MILIMÉTRICA
+    const rampa = mk(new THREE.BoxGeometry(0.8, 0.04, 0.3), M.internal);
+    rampa.position.set(0.12, -0.4, -0.2);
+    rampa.rotation.z = -Math.PI / 6.5;
+    hardwareGroup.add(rampa);
+
+    // SALIDA EXTERIOR (TUBO PVC) Y SERVOCOMPUERTA
     const codoPVC = mk(new THREE.CylinderGeometry(0.12, 0.14, 0.45, 10), M.accent);
     codoPVC.rotation.z = Math.PI / 2.6;
-    codoPVC.position.set(0.52, -0.75, -0.2);
+    codoPVC.position.set(0.52, -0.65, -0.2);
     modelGroup.add(codoPVC);
 
-    // Servocompuerta interna articulada
     const flapPivot = new THREE.Group();
-    flapPivot.position.set(0.44, -0.68, -0.2);
+    flapPivot.position.set(0.48, -0.55, -0.2);
     flapPivot.rotation.z = Math.PI / 2.6;
     modelGroup.add(flapPivot);
-
+    
     const laminaInterna = mk(new THREE.BoxGeometry(0.02, 0.22, 0.2), M.silver);
     laminaInterna.position.y = -0.11;
     flapPivot.add(laminaInterna);
 
-    // Plato receptor
+    // TAZÓN RECEPTOR (PLATO)
     const bowl = mk(new THREE.CylinderGeometry(0.52, 0.42, 0.14, 12), M.bowlOff);
     bowl.position.set(1.0, -0.98, -0.2);
     modelGroup.add(bowl);
 
-    // COMPONENTES INTERNOS OCULTOS (VISIBLES SÓLO EN X-RAY)
-    const hardwareGroup = new THREE.Group();
-    modelGroup.add(hardwareGroup);
-
+    // PLACA ELECTRÓNICA MICROCONTROLADORA Y MOTOR NEMA
     const arduino = new THREE.Group();
-    arduino.position.set(-0.25, -0.85, -0.2);
+    arduino.position.set(-0.25, -0.85, 0.2);
     arduino.rotation.y = Math.PI / 2;
-    const pcb = mk(new THREE.BoxGeometry(0.45, 0.02, 0.6), M.pcbGreen);
-    const usb = mk(new THREE.BoxGeometry(0.12, 0.08, 0.16), M.silver);
-    usb.position.set(-0.14, 0.04, -0.22);
-    const femalePins = mk(new THREE.BoxGeometry(0.03, 0.04, 0.4), M.pins);
-    femalePins.position.set(0.18, 0.03, 0.05);
-    arduino.add(pcb, usb, femalePins);
+    
+    const pcbBase = mk(new THREE.BoxGeometry(0.45, 0.02, 0.6), M.pcbGreen);
+    const usbPort = mk(new THREE.BoxGeometry(0.12, 0.08, 0.16), M.silver);
+    usbPort.position.set(-0.14, 0.04, -0.22);
+    arduino.add(pcbBase, usbPort);
     hardwareGroup.add(arduino);
 
     const nema17 = mk(new THREE.BoxGeometry(0.44, 0.44, 0.44), ph(0x34495e));
     nema17.position.set(0.2, -0.85, -0.2);
     hardwareGroup.add(nema17);
 
-    // INTERFAZ FÍSICA EXTERIOR FRONTAL
+    // COMPONENTES FRONTALES DE INTERFAZ INTEGRADA
     const lcdModule = new THREE.Group();
     lcdModule.position.set(0, 0.3, 0.46);
-    const lcdPCB = mk(new THREE.BoxGeometry(0.68, 0.28, 0.02), M.pcbGreen);
+    
+    const lcdPlate = mk(new THREE.BoxGeometry(0.68, 0.28, 0.02), M.pcbGreen);
     const lcdFrame = mk(new THREE.BoxGeometry(0.56, 0.22, 0.025), ph(0x1e272e));
-    lcdFrame.position.z = 0.01;
+    lcdFrame.position.set(0, 0, 0.01);
+    
     const lcdDisplay = mk(new THREE.BoxGeometry(0.48, 0.14, 0.02), M.lcdOff);
-    lcdDisplay.position.z = 0.02;
-    lcdModule.add(lcdPCB, lcdFrame, lcdDisplay);
+    lcdDisplay.position.set(0, 0, 0.02);
+    
+    lcdModule.add(lcdPlate, lcdFrame, lcdDisplay);
     modelGroup.add(lcdModule);
 
+    // CHASSIS DEL SENSOR ULTRASÓNICO HC-SR04
     const sonar = new THREE.Group();
     sonar.position.set(0, -0.2, 0.46);
-    const sonarPCB = mk(new THREE.BoxGeometry(0.32, 0.14, 0.02), M.pcbBlue);
-    const txEye = mk(new THREE.CylinderGeometry(0.05, 0.05, 0.08, 8), M.silver);
-    txEye.rotation.x = Math.PI / 2; txEye.position.set(-0.08, 0, 0.04);
-    const rxEye = txEye.clone(); rxEye.position.x = 0.08;
-    sonar.add(sonarPCB, txEye, rxEye);
+    
+    const sonarPcb = mk(new THREE.BoxGeometry(0.32, 0.14, 0.02), M.pcbBlue);
+    
+    const sonarLeft = mk(new THREE.CylinderGeometry(0.05, 0.05, 0.08, 8), M.silver);
+    sonarLeft.rotation.x = Math.PI / 2;
+    sonarLeft.position.set(-0.08, 0, 0.04);
+    
+    const sonarRight = mk(new THREE.CylinderGeometry(0.05, 0.05, 0.08, 8), M.silver);
+    sonarRight.rotation.x = Math.PI / 2;
+    sonarRight.position.set(0.08, 0, 0.04);
+    
+    sonar.add(sonarPcb, sonarLeft, sonarRight);
     modelGroup.add(sonar);
 
-    // CONSTRUCCIÓN PROCEDURAL DEL GATITO EN 3D
+    // FIGURA DE LA MASCOTA EXPERIMENTAL
     const cat = new THREE.Group();
-    cat.position.set(1.1, -1.08, 0.5); // Sentado amigablemente al lado del plato
+    cat.position.set(1.1, -1.08, 0.5); 
     cat.rotation.y = -Math.PI / 3.5;
+    
+    const catBody = mk(new THREE.BoxGeometry(0.26, 0.38, 0.26), M.catFur);
+    catBody.position.set(0, 0.19, 0);
+    
+    const catHead = mk(new THREE.BoxGeometry(0.24, 0.22, 0.22), M.catFur); 
+    catHead.position.set(0, 0.44, 0.04);
+    
+    const catTail = mk(new THREE.BoxGeometry(0.05, 0.26, 0.05), M.catFur); 
+    catTail.position.set(0, 0.12, -0.14); 
+    catTail.rotation.x = -Math.PI / 4;
+    
+    const earL = mk(new THREE.ConeGeometry(0.05, 0.09, 4), M.catFur); earL.position.set(-0.08, 0.58, 0.04);
+    const earR = mk(new THREE.ConeGeometry(0.05, 0.09, 4), M.catFur); earR.position.set(0.08, 0.58, 0.04);
+    const eyeL = mk(new THREE.BoxGeometry(0.04, 0.04, 0.01), M.catEyes); eyeL.position.set(-0.06, 0.46, 0.145);
+    const eyeR = mk(new THREE.BoxGeometry(0.04, 0.04, 0.01), M.catEyes); eyeR.position.set(0.06, 0.46, 0.145);
+    const snout = mk(new THREE.BoxGeometry(0.05, 0.03, 0.02), M.catWhite); snout.position.set(0, 0.4, 0.14);
+    const pawL = mk(new THREE.BoxGeometry(0.07, 0.16, 0.07), M.catFur); pawL.position.set(-0.08, 0.08, 0.12);
+    const pawR = mk(new THREE.BoxGeometry(0.07, 0.16, 0.07), M.catFur); pawR.position.set(0.08, 0.08, 0.12);
+    
+    cat.add(catBody, catHead, earL, earR, eyeL, eyeR, snout, catTail, pawL, pawR);
     modelGroup.add(cat);
 
-    const catBody = mk(new THREE.BoxGeometry(0.26, 0.38, 0.26), M.catFur);
-    catBody.position.y = 0.19;
-    cat.add(catBody);
-
-    const catHead = mk(new THREE.BoxGeometry(0.24, 0.22, 0.22), M.catFur);
-    catHead.position.set(0, 0.44, 0.04);
-    cat.add(catHead);
-
-    // Orejas triangulares estilizadas
-    const earL = mk(new THREE.ConeGeometry(0.05, 0.09, 4), M.catFur);
-    earL.position.set(-0.08, 0.58, 0.04);
-    const earR = earL.clone(); earR.position.x = 0.08;
-    cat.add(earL, earR);
-
-    // Ojos del felino
-    const eyeL = mk(new THREE.BoxGeometry(0.04, 0.04, 0.01), M.catEyes);
-    eyeL.position.set(-0.06, 0.46, 0.145);
-    const eyeR = eyeL.clone(); eyeR.position.x = 0.06;
-    cat.add(eyeL, eyeR);
-
-    // Hociquito tierno
-    const snout = mk(new THREE.BoxGeometry(0.05, 0.03, 0.02), M.catWhite);
-    snout.position.set(0, 0.4, 0.14);
-    cat.add(snout);
-
-    // Patas delanteras fijas
-    const legL = mk(new THREE.BoxGeometry(0.07, 0.16, 0.07), M.catFur);
-    legL.position.set(-0.08, 0.08, 0.12);
-    const legR = legL.clone(); legR.position.x = 0.08;
-    cat.add(legL, legR);
-
-    // COLA ARTICULADA (ANIMADA POR SOFTWARE)
-    const catTail = mk(new THREE.BoxGeometry(0.05, 0.26, 0.05), M.catFur);
-    catTail.position.set(0, 0.12, -0.14);
-    catTail.rotation.x = -Math.PI / 4;
-    cat.add(catTail);
-
-    // ALMACENAMIENTO DE PARTÍCULAS DE ALIMENTO (POOL SEGURO DE MAX 15)
+    // SISTEMA DE PARTICULADO FÍSICO (Simulador de croquetas)
     const POOL = 15;
-    const DROP_Y = -0.68, BASE_Y = -0.96, SPREAD = 0.08;
+    const BASE_Y = -0.96;
     const foodGeo = new THREE.SphereGeometry(0.04, 5, 4);
     const particles = [];
-
     for (let i = 0; i < POOL; i++) {
-      const p = mk(foodGeo, M.food); p.visible = false;
+      const p = mk(foodGeo, M.food); 
+      p.visible = false;
       p.userData = { active: false, vY: 0, delay: i * 4 };
-      modelGroup.add(p); particles.push(p);
+      modelGroup.add(p); 
+      particles.push(p);
     }
 
-    // ARQUITECTURA DEL BUCLE DE ANIMACIÓN (60 FPS CLEAN)
+    // BUCLE DE RENDERIZADO Y FÍSICAS DE ANIMACIÓN
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
-      const dt = clock.getDelta();
-      tailTimer += dt * (active ? 15.0 : 3.0); // La colita se acelera si cae comida
+      
+      // Forzar calibración de tamaño inicial si es necesario
+      if (initialResizeTicks > 0) {
+        resize();
+        initialResizeTicks--;
+      }
 
-      // Animación de la compuerta interna de PVC (Servomotor)
-      const targetFlap = active ? -Math.PI / 2.6 : 0;
+      const dt = clock.getDelta();
+      tailTimer += dt * (active ? 15.0 : 3.0);
+
+      // Interpolación del ángulo de la compuerta servomotorizada
+      const targetFlap = active ? -Math.PI / 2.2 : 0;
       flapAngle += (targetFlap - flapAngle) * 10.0 * dt;
       laminaInterna.rotation.z = flapAngle;
 
-      // Animación feliz de la colita del gato
+      // Movimientos orgánicos de la mascota
       catTail.rotation.z = Math.sin(tailTimer) * (active ? 0.4 : 0.1);
       catHead.rotation.y = Math.sin(tailTimer * 0.4) * 0.06;
 
-      // Motor de fluidos discreto para las croquetas
+      // Gestión de cinemática de caída de partículas por gravedad
       for (let i = 0; i < POOL; i++) {
         const p = particles[i];
         if (active) {
           if (!p.userData.active) {
             if (--p.userData.delay <= 0) {
-              p.userData.active = true;
-              p.userData.vY = -(0.01 + Math.random() * 0.01);
-              p.position.set(0.48 + (Math.random() - 0.5) * SPREAD, DROP_Y, -0.2 + (Math.random() - 0.5) * SPREAD);
+              p.userData.active = true; p.userData.vY = 0;
+              p.position.set(-0.25 + (Math.random() - 0.5) * 0.15, 0.65, -0.2 + (Math.random() - 0.5) * 0.15);
               p.visible = true;
             }
           } else {
-            p.userData.vY -= 0.0022; p.position.y += p.userData.vY;
-            p.position.x += 0.013;
+            if (p.position.y > -0.2) {
+              p.userData.vY -= 0.0025; p.position.y += p.userData.vY;
+            } else if (p.position.y > -0.6) {
+              p.position.y -= 0.012; p.position.x += 0.022;
+            } else {
+              p.userData.vY -= 0.002; p.position.y += p.userData.vY; p.position.x += 0.004;
+            }
+
             if (p.position.y <= BASE_Y) {
               p.userData.active = false; p.visible = false;
               p.userData.delay = 4 + Math.floor(Math.random() * 8);
             }
           }
         } else if (p.visible) {
-          p.visible = false; p.userData.active = false;
-          p.userData.delay = i * 4;
+          p.visible = false; p.userData.active = false; p.userData.delay = i * 4;
         }
       }
 
@@ -457,128 +443,117 @@
     }
     animate();
 
-    // INTERFAZ DE USUARIO Y CONTROL DE LOGICA DEL ENTORNO
+    // MONITORIZACIÓN DE INTERFAZ Y ACTUALIZACIÓN DE ESTADOS LÓGICOS
     function ui() {
       active = inA && inB;
-
       const inputs = [['A', inA, 'btn-a', 'led-a'], ['B', inB, 'btn-b', 'led-b']];
-      inputs.forEach(([label, state, btnId, ledId]) => {
-        const btn = document.getElementById(btnId);
-        const led = document.getElementById(ledId);
-        if (state) {
-          btn.textContent = `${label} = 1 | ACTIVO`;
-          btn.className = 'btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-cyan-500 text-cyan-600 bg-cyan-500/10 transition-colors duration-200';
-          led.className = 'w-2.5 h-2.5 rounded-full led-on transition-all duration-300';
-        } else {
-          btn.textContent = `${label} = 0 | INACTIVO`;
-          btn.className = 'btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-400 opacity-60 bg-black/5 transition-colors duration-200';
-          led.className = 'w-2.5 h-2.5 rounded-full led-off transition-all duration-300';
+      
+      inputs.forEach(([l, s, bId, lId]) => {
+        const btn = document.getElementById(bId), led = document.getElementById(lId);
+        if(btn) {
+          btn.textContent = s ? `${l} = 1 | ACTIVO` : `${l} = 0 | INACTIVO`;
+          btn.className = s ? 'btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-cyan-500 text-cyan-600 bg-cyan-500/10 transition-colors duration-200' : 'btn-ctrl w-full py-2 text-[10px] tracking-widest font-bold rounded-sm cursor-pointer select-none border border-slate-400 opacity-60 bg-black/5 transition-colors duration-200';
         }
+        if(led) led.className = s ? 'w-2.5 h-2.5 rounded-full led-on transition-all duration-300' : 'w-2.5 h-2.5 rounded-full led-off transition-all duration-300';
       });
 
-      const gp = document.getElementById('gp'); const gt = document.getElementById('gt');
-      const gla = document.getElementById('gl-a'); const glb = document.getElementById('gl-b');
-      const glo = document.getElementById('gl-o');
-
-      if (active) {
-        gp.setAttribute('stroke', '#06b6d4'); gt.setAttribute('fill', '#06b6d4');
-        [gla, glb, glo].forEach(l => l.setAttribute('stroke', '#06b6d4'));
-      } else {
-        gp.setAttribute('stroke', isLight ? '#64748b' : '#475569'); gt.setAttribute('fill', isLight ? '#64748b' : '#475569');
-        gla.setAttribute('stroke', inA ? '#0891b2' : (isLight ? '#cbd5e1' : '#475569'));
-        glb.setAttribute('stroke', inB ? '#0891b2' : (isLight ? '#cbd5e1' : '#475569'));
-        glo.setAttribute('stroke', isLight ? '#cbd5e1' : '#475569');
+      // Iluminación reactiva en el diagrama SVG de la compuerta AND
+      const gp = document.getElementById('gp'), gt = document.getElementById('gt'), gla = document.getElementById('gl-a'), glb = document.getElementById('gl-b'), glo = document.getElementById('gl-o');
+      if (gp && gt && gla && glb && glo) {
+        if (active) {
+          gp.setAttribute('stroke', '#06b6d4'); gt.setAttribute('fill', '#06b6d4'); [gla, glb, glo].forEach(l => l.setAttribute('stroke', '#06b6d4'));
+        } else {
+          gp.setAttribute('stroke', isLight ? '#64748b' : '#475569'); gt.setAttribute('fill', isLight ? '#64748b' : '#475569');
+          gla.setAttribute('stroke', inA ? '#0891b2' : (isLight ? '#cbd5e1' : '#475569')); glb.setAttribute('stroke', inB ? '#0891b2' : (isLight ? '#cbd5e1' : '#475569')); glo.setAttribute('stroke', isLight ? '#cbd5e1' : '#475569');
+        }
       }
 
-      document.getElementById('wire-a').className = `h-px w-8 transition-colors duration-300 ${inA ? 'wire-hot' : 'wire-cold'}`;
-      document.getElementById('wire-b').className = `h-px w-8 transition-colors duration-300 ${inB ? 'wire-hot' : 'wire-cold'}`;
-      document.getElementById('wire-o').className = `h-px w-6 transition-colors duration-300 ${active ? 'wire-hot' : 'wire-cold'}`;
-
-      document.getElementById('led-o').className = `w-4 h-4 rounded-full border transition-all duration-300 ${active ? 'led-on border-cyan-500' : 'led-off border-slate-600'}`;
+      // Conmutación de cables calientes/fríos (Hardware lógico simulado)
+      const wA = document.getElementById('wire-a'), wB = document.getElementById('wire-b'), wO = document.getElementById('wire-o'), lO = document.getElementById('led-o');
+      if(wA) wA.className = `h-px w-8 transition-colors duration-300 ${inA ? 'wire-hot' : 'wire-cold'}`;
+      if(wB) wB.className = `h-px w-8 transition-colors duration-300 ${inB ? 'wire-hot' : 'wire-cold'}`;
+      if(wO) wO.className = `h-px w-6 transition-colors duration-300 ${active ? 'wire-hot' : 'wire-cold'}`;
+      if(lO) lO.className = `w-4 h-4 rounded-full border transition-all duration-300 ${active ? 'led-on border-cyan-500' : 'led-off border-slate-600'}`;
       
       const gc = document.getElementById('gate-card');
-      if (active) { gc.classList.add('gate-glow'); gc.style.borderColor = '#0891b2'; } 
-      else { gc.classList.remove('gate-glow'); gc.style.borderColor = 'var(--border)'; }
+      if(gc) active ? (gc.classList.add('gate-glow'), gc.style.borderColor = '#0891b2') : (gc.classList.remove('gate-glow'), gc.style.borderColor = 'var(--border)');
 
       const ov = document.getElementById('out-val');
-      ov.textContent = active ? 'A · B = 1 (SALIDA ALTA)' : 'A · B = 0 (SALIDA BAJA)';
-      ov.className = `text-[10px] font-bold transition-colors duration-300 ${active ? 'text-cyan-600 opacity-100' : 'opacity-50'}`;
-
-      // Actualizar Tabla de Verdad
-      ['r00','r01','r10','r11'].forEach(id => {
-        const r = document.getElementById(id); r.className = 'border-b border-black/5 opacity-40';
-      });
-      const targetRow = document.getElementById(`r${inA?1:0}${inB?1:0}`);
-      targetRow.className = active ? 'border-b border-cyan-500/20 bg-cyan-500/5 tt-hot opacity-100' : 'border-b border-amber-500/20 bg-amber-500/5 tt-warn opacity-100';
-
-      // Diagnóstico Físico de Hardware
-      const stLcd = document.getElementById('st-lcd'); const stD = document.getElementById('st-d');
-      const badge = document.getElementById('active-badge'); const stCat = document.getElementById('st-cat');
-
-      if (active) {
-        stLcd.textContent = 'DISPENSANDO...'; stLcd.className = 'font-bold text-cyan-600';
-        stD.textContent = 'LAMINA: ABIERTA'; stD.className = 'font-bold text-cyan-600';
-        stCat.textContent = '¡COMIENDO FELIZ! 🐾'; stCat.className = 'font-bold text-emerald-600';
-        badge.textContent = '● SISTEMA DISTRIBUYENDO'; badge.className = 'text-[9px] tracking-[0.15em] font-bold text-cyan-600';
-        lcdDisplay.material = M.lcdOn; bowl.material = M.bowlOn;
-      } else {
-        stLcd.textContent = inB ? 'ESPERANDO SEÑAL A' : 'MODO ESPERA'; stLcd.className = 'font-bold opacity-50';
-        stD.textContent = 'CERRADA'; stD.className = 'font-bold opacity-50';
-        stCat.textContent = inA ? 'DETECTADO - ESPERA HORA' : 'ESPERANDO JUNTO AL PLATO'; stCat.className = 'font-bold text-amber-600';
-        badge.textContent = 'SISTEMA EN REPOSO'; badge.className = 'text-[9px] tracking-[0.15em] font-bold opacity-40';
-        lcdDisplay.material = inB ? M.lcdOn : M.lcdOff; bowl.material = M.bowlOff;
+      if(ov) {
+        ov.textContent = active ? 'A · B = 1 (SALIDA ALTA)' : 'A · B = 0 (SALIDA BAJA)';
+        ov.className = `text-[10px] font-bold transition-colors duration-300 ${active ? 'text-cyan-600 opacity-100' : 'opacity-50'}`;
       }
+
+      ['r00','r01','r10','r11'].forEach(id => {
+        const row = document.getElementById(id);
+        if(row) row.className = 'border-b border-black/5 opacity-40';
+      });
+      const activeRow = document.getElementById(`r${inA?1:0}${inB?1:0}`);
+      if(activeRow) activeRow.className = active ? 'border-b border-cyan-500/20 bg-cyan-500/5 tt-hot opacity-100' : 'border-b border-amber-500/20 bg-amber-500/5 tt-warn opacity-100';
+
+      const stLcd = document.getElementById('st-lcd'), stD = document.getElementById('st-d'), badge = document.getElementById('active-badge'), stCat = document.getElementById('st-cat'), stM = document.getElementById('st-m');
+      
+      if(stLcd) {
+        stLcd.textContent = active ? 'DISPENSANDO...' : (inB ? 'ESPERANDO SEÑAL A' : 'MODO ESPERA');
+        stLcd.className = active ? 'font-bold text-cyan-600' : 'font-bold opacity-50';
+      }
+      if(stD) {
+        stD.textContent = active ? 'LAMINA: ABIERTA' : 'CERRADA';
+        stD.className = active ? 'font-bold text-cyan-600' : 'font-bold opacity-50';
+      }
+      if(stM) {
+        stM.textContent = active ? 'CAYENDO POR RAMPA' : 'RETENIDO EN CILINDRO';
+        stM.className = active ? 'font-bold text-cyan-600' : 'font-bold opacity-50';
+      }
+      if(stCat) {
+        stCat.textContent = active ? '¡COMIENDO FELIZ! 🐾' : (inA ? 'DETECTADO - ESPERA HORA' : 'ESPERANDO JUNTO AL PLATO');
+        stCat.className = active ? 'font-bold text-emerald-600' : 'font-bold text-amber-600';
+      }
+      if(badge) {
+        badge.textContent = active ? '● SISTEMA DISTRIBUYENDO' : 'SISTEMA EN REPOSO';
+        badge.className = active ? 'text-[9px] tracking-[0.15em] font-bold text-cyan-600' : 'text-[9px] tracking-[0.15em] font-bold opacity-40';
+      }
+
+      // Cambio cromático directo de los componentes reflectantes
+      if(lcdDisplay) lcdDisplay.material = (active || inB) ? M.lcdOn : M.lcdOff;
+      if(bowl) bowl.material = active ? M.bowlOn : M.bowlOff;
     }
 
-    window.__ctrl = function(channel) {
-      if (channel === 'A') inA = !inA;
-      else                 inB = !inB;
-      ui();
-    };
+    // Callback de interacción lógica expuesta en el entorno global de ventanas
+    window.__ctrl = function(ch) { ch === 'A' ? inA = !inA : inB = !inB; ui(); };
 
-    // INTERRUPTOR DE RADIOGRAFÍA (X-RAY)
-    document.getElementById('xray-btn').addEventListener('click', () => {
-      xray = !xray;
-      casing.material = xray ? M.casingXR : M.casing;
+    // CONTROLADORES DE EVENTO ASOCIADOS A LOS BOTONES INTEGRADOS DEL LIENZO
+    document.getElementById('xray-btn').addEventListener('click', function() {
+      xray = !xray; 
+      casing.material = xray ? M.casingXR : M.casing; 
+      topHole.material = xray ? M.casingXR : M.hole;
       const btn = document.getElementById('xray-btn');
       if (xray) {
-        btn.textContent = '⬡ X-RAY : ON';
-        btn.style.borderColor = '#06b6d4'; btn.style.color = '#06b6d4';
+        btn.textContent = '⬡ X-RAY : ON'; btn.style.borderColor = '#06b6d4'; btn.style.color = '#06b6d4';
       } else {
-        btn.textContent = '⬡ X-RAY : OFF';
-        btn.style.borderColor = '#64748b'; btn.style.color = 'var(--text-muted)';
+        btn.textContent = '⬡ X-RAY : OFF'; btn.style.borderColor = '#64748b'; btn.style.color = 'var(--text-muted)';
       }
     });
 
-    // SISTEMA DE CAMBIO DE TEMA CENTRALIZADO (MODO CLARO)
-    document.getElementById('theme-btn').addEventListener('click', () => {
-      isLight = !isLight;
+    document.getElementById('theme-btn').addEventListener('click', function() {
+      isLight = !isLight; 
       document.body.classList.toggle('light-mode', isLight);
-      
       const themeBtn = document.getElementById('theme-btn');
       if (isLight) {
-        themeBtn.textContent = '🌙 MODO OSCURO';
+        themeBtn.textContent = '🌙 MODO OSCURO'; 
         themeBtn.className = 'btn-ctrl pointer-events-auto px-3 py-1.5 text-[10px] tracking-widest font-bold border border-slate-700 text-slate-700 bg-slate-200 hover:bg-slate-300 transition-all duration-200 rounded-sm cursor-pointer select-none';
-        scene.background.setHex(0xf8fafc);
-        scene.fog.color.setHex(0xf8fafc);
-        scene.remove(grid);
-        grid = new THREE.GridHelper(16, 32, 0xcbd5e1, 0xe2e8f0);
-        grid.position.y = -1.2;
-        scene.add(grid);
+        scene.background.setHex(0xf8fafc); scene.fog.color.setHex(0xf8fafc);
+        scene.remove(grid); grid = new THREE.GridHelper(16, 32, 0xcbd5e1, 0xe2e8f0); grid.position.y = -1.2; scene.add(grid);
       } else {
-        themeBtn.textContent = '☀️ MODO CLARO';
+        themeBtn.textContent = '☀️ MODO CLARO'; 
         themeBtn.className = 'btn-ctrl pointer-events-auto px-3 py-1.5 text-[10px] tracking-widest font-bold border border-amber-600 text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 transition-all duration-200 rounded-sm cursor-pointer select-none';
-        scene.background.setHex(0x060b12);
-        scene.fog.color.setHex(0x060b12);
-        scene.remove(grid);
-        grid = new THREE.GridHelper(16, 32, 0x0e243d, 0x081626);
-        grid.position.y = -1.2;
-        scene.add(grid);
+        scene.background.setHex(0x060b12); scene.fog.color.setHex(0x060b12);
+        scene.remove(grid); grid = new THREE.GridHelper(16, 32, 0x0e243d, 0x081626); grid.position.y = -1.2; scene.add(grid);
       }
       ui();
     });
 
-    // INICIALIZACIÓN DE ENTORNO
+    // Ejecución de renderizado inicial de los estados
     ui();
   </script>
 </body>
